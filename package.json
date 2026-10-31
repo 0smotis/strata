@@ -1,0 +1,97 @@
+{
+  "name": "strata",
+  "version": "0.3.0",
+  "description": "Strata \u2014 a layered photo editor",
+  "main": "main.js",
+  "scripts": {
+    "start": "node scripts/vendor.cjs && electron .",
+    "dist": "node scripts/vendor.cjs && electron-builder --win nsis --x64 --publish never",
+    "vendor": "node scripts/vendor.cjs",
+    "dist:dir": "node scripts/vendor.cjs && electron-builder --win dir --x64"
+  },
+  "keywords": [],
+  "author": "Noah",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@huggingface/transformers": "^3.5.1",
+    "ag-psd": "^22.0.2",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "gifenc": "^1.0.3",
+    "onnxruntime-web": "^1.21.0",
+    "png-to-ico": "^2.1.8",
+    "resedit": "^2.0.3"
+  },
+  "productName": "Strata",
+  "build": {
+    "appId": "com.noah.strata",
+    "productName": "Strata",
+    "files": [
+      "main.js",
+      "preload.js",
+      "updater.js",
+      "src/**/*",
+      "build/icon.png",
+      "!**/*.map"
+    ],
+    "asar": true,
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png",
+      "artifactName": "Strata-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Strata",
+      "perMachine": false,
+      "artifactName": "Strata-Setup-${version}.${ext}",
+      "deleteAppDataOnUninstall": false
+    },
+    "fileAssociations": [
+      {
+        "ext": [
+          "psd",
+          "psb"
+        ],
+        "name": "Photoshop Document",
+        "role": "Editor"
+      },
+      {
+        "ext": [
+          "png",
+          "jpg",
+          "jpeg",
+          "webp"
+        ],
+        "name": "Image",
+        "role": "Editor"
+      }
+    ],
+    "electronLanguages": [
+      "en-US"
+    ],
+    "asarUnpack": [
+      "src/vendor/**"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "0smotis",
+      "repo": "strata",
+      "private": true,
+      "releaseType": "release"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0smotis/strata.git"
+  }
+}

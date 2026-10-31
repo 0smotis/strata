@@ -1,0 +1,78 @@
+module.exports = async (win, OUT, errs) => {
+  const ev = (f, ...a) => win.evaluate(f, ...a);
+  const shot = (n) => win.screenshot({ path: OUT + '/' + n + '.png' });
+  const log = (...a) => console.log(...a);
+  // make a photo-like doc programmatically
+  await ev(async () => {
+    const { newDocument } = await import('./js/doc/document.js');
+    const { addDoc } = await import('./js/commands.js');
+    const d = newDocument({ width: 1200, height: 800, name: 'test.psd' });
+    const c = d.layers[0].canvas, g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, 0, 800); gr.addColorStop(0, '#5aa0e8'); gr.addColorStop(0.55, '#cfe6ff'); gr.addColorStop(0.56, '#4f8a3a'); gr.addColorStop(1, '#2e5a22'); g.fillStyle = gr; g.fillRect(0, 0, 1200, 800);
+    for (let i = 0; i < 4000; i++) { g.fillStyle = `rgba(${20 + Math.random() * 60},${80 + Math.random() * 80},${20 + Math.random() * 40},.5)`; g.fillRect(Math.random() * 1200, 450 + Math.random() * 350, 3, 6); }
+    g.fillStyle = '#c33'; g.beginPath(); g.arc(600, 380, 70, 0, 7); g.fill();
+    d.layers[0].touch(true); d.history = []; d.hIndex = -1; d.commit('Open');
+    addDoc(d);
+  });
+  await win.waitForTimeout(600);
+  log('step filter dialog');
+  ev(() => app.commands.filter.run('gaussianBlur'));
+  await win.waitForTimeout(1200); await shot('10-filter-dialog');
+  await win.keyboard.press('Escape'); await win.waitForTimeout(300);
+  log('step adjustment dialog (curves)');
+  ev(() => app.commands.adjustment.run('curves'));
+  await win.waitForTimeout(1000); await shot('11-curves-dialog');
+  await win.keyboard.press('Escape'); await win.waitForTimeout(300);
+  log('step adj layer levels');
+  await ev(() => app.commands.newAdjustmentLayer.run('levels'));
+  await win.waitForTimeout(800); await shot('12-levels-props');
+  await ev(() => app.commands.newAdjustmentLayer.run('curves'));
+  await ev(() => { const L = app.doc.active; L.data.params.channels.rgb = [[0, 0], [100, 60], [200, 230], [255, 255]]; L.touch(); app.doc.commit('mod curves'); app.emit('props-refresh'); });
+  await win.waitForTimeout(800); await shot('13-curves-props');
+  log('step layer style');
+  await ev(() => { const d = app.doc; d.setActive(d.layers[0].id); app.commands.layerViaCopy.run(); });
+  ev(() => app.commands.layerStyle.run('dropShadow'));
+  await win.waitForTimeout(800); await shot('14-layer-style');
+  await win.keyboard.press('Enter'); await win.waitForTimeout(300);
+  log('step magic wand + content aware');
+  await ev(() => { const d = app.doc; d.setActive(d.layers[0].id); app.commands.setTool.run('magicWand'); });
+  const vp = await win.$('#viewport'); const b = await vp.boundingBox();
+  const toS = (x, y) => ev(([x, y]) => { const v = app.doc.view, r = document.querySelector('#viewport').getBoundingClientRect(); return { x: r.left + (x - v.cx) * v.zoom + r.width / 2, y: r.top + (y - v.cy) * v.zoom + r.height / 2 }; }, [x, y]);
+  let p = await toS(600, 380); await win.mouse.click(p.x, p.y);
+  await win.waitForTimeout(300);
+  await ev(() => app.commands.modifySel.run);
+  log('sel bounds', JSON.stringify(await ev(() => app.doc.selBounds)));
+  await shot('15-wand');
+  // expand selection a bit then content aware fill
+  await ev(async () => { const { growSel } = await import('./js/doc/selection.js'); app.doc.setSelection(growSel(app.doc, 6)); });
+  const t0 = Date.now();
+  await ev(() => app.commands.contentAwareFill.run());
+  log('content-aware ms', Date.now() - t0);
+  await ev(() => app.commands.deselect.run());
+  await win.waitForTimeout(300); await shot('16-content-aware');
+  log('step spot heal');
+  await ev(() => { app.commands.setTool.run('spotHeal'); app.opts.spotHeal.size = 40; });
+  p = await toS(300, 600); await win.mouse.move(p.x, p.y); await win.mouse.down(); await win.mouse.move(p.x + 40, p.y + 10, { steps: 5 }); await win.mouse.up();
+  await win.waitForTimeout(1500);
+  log('step crop + image size');
+  await ev(async () => { const { cropDocument } = await import('./js/tools/misc.js'); cropDocument(app.doc, { x: 100, y: 50, w: 900, h: 600 }, true); });
+  log('size', JSON.stringify(await ev(() => [app.doc.width, app.doc.height])));
+  log('step save psd + reopen');
+  const res = await ev(async () => {
+    const { savePsdBytes, openBytes } = await import('./js/doc/io.js');
+    const bytes = savePsdBytes(app.doc);
+    const d2 = await openBytes(bytes, 're.psd');
+    return { size: bytes.length, layers: d2.all().map(l => l.kind + ':' + l.name + (l.mask ? '[m]' : '') + (l.effects ? '[fx]' : '')), w: d2.width, h: d2.height };
+  });
+  log(JSON.stringify(res));
+  log('step generative fill (no provider)');
+  await ev(async () => { const { rectSel } = await import('./js/doc/selection.js'); const d = app.doc; d.setSelection(rectSel(d, { x: 400, y: 250, w: 160, h: 120 })); });
+  await win.waitForTimeout(400); await shot('17-taskbar-sel');
+  const t1 = Date.now();
+  await ev(() => app.commands.generativeFill.run(''));
+  log('gen ms', Date.now() - t1, JSON.stringify(await ev(() => app.doc.active && { name: app.doc.active.name, gen: !!app.doc.active.generative })));
+  await win.waitForTimeout(500); await shot('18-gen');
+  log('step history panel');
+  await ev(() => app.emit('show-panel', 'history'));
+  await win.waitForTimeout(300); await shot('19-history');
+};

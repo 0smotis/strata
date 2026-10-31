@@ -1,0 +1,52 @@
+module.exports = async (win, OUT, errs) => {
+  const ev = (f, ...a) => win.evaluate(f, ...a);
+  // new document via quick preset
+  console.log('step new'); await win.click('text=Web Large');
+  await win.waitForTimeout(800);
+  const vp = await win.$('#viewport'); const b = await vp.boundingBox();
+  const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+  console.log('step brush');
+  await win.keyboard.press('b');
+  await ev(() => { app.fg = '#d0302f'; app.opts.brush.size = 60; app.opts.brush.hardness = 0.8; app.emit('colors'); });
+  await win.mouse.move(cx - 300, cy - 100); await win.mouse.down();
+  for (let i = 0; i < 30; i++) await win.mouse.move(cx - 300 + i * 20, cy - 100 + Math.sin(i / 3) * 60);
+  await win.mouse.up();
+  console.log('step sel');
+  await win.keyboard.press('Control+Shift+N');
+  await win.keyboard.press('m'); await win.keyboard.press('Shift+m');
+  await win.mouse.move(cx - 100, cy - 50); await win.mouse.down(); await win.mouse.move(cx + 150, cy + 150, { steps: 5 }); await win.mouse.up();
+  await ev(() => { app.fg = '#2d6be0'; app.emit('colors'); });
+  await win.keyboard.press('Alt+Backspace');
+  await win.keyboard.press('Control+d');
+  console.log('step shape');
+  await ev(() => { app.commands.setTool.run('rectShape'); app.fg = '#22aa55'; });
+  await win.mouse.move(cx + 200, cy - 200); await win.mouse.down(); await win.mouse.move(cx + 400, cy - 60, { steps: 4 }); await win.mouse.up();
+  await win.keyboard.press('t');
+  await win.mouse.click(cx - 350, cy + 200);
+  await win.keyboard.type('Hello Strata');
+  await win.keyboard.press('Escape');
+  console.log('step adj');
+  await ev(() => app.commands.newAdjustmentLayer.run('hueSaturation'));
+  await ev(() => { const L = app.doc.active; L.data.params.hue = 60; L.touch(); app.doc.invalidate(); app.doc.commit('mod'); });
+  await win.waitForTimeout(500);
+  await win.screenshot({ path: OUT + '/02-doc.png' });
+  const info = await ev(() => ({ layers: app.doc.all().map(l => l.kind + ':' + l.name), hist: app.doc.history.map(h => h.name) }));
+  console.log(JSON.stringify(info));
+  // drop shadow, filter, transform
+  await ev(() => { const d = app.doc; d.setActive(d.all().find(l => l.kind === 'shape').id); });
+  await ev(() => { const d = app.doc, L = d.active; L.effects = (window.__fx || null); });
+  console.log('step undo');
+  await win.keyboard.press('Control+z'); await win.keyboard.press('Control+z'); await win.keyboard.press('Control+Shift+z');
+  console.log('step tr');
+  await ev(() => { const d = app.doc; d.setActive(d.all().find(l => l.name === 'Layer 1').id); });
+  await win.keyboard.press('Control+t');
+  await win.waitForTimeout(200);
+  await win.mouse.move(cx + 20, cy + 40); await win.mouse.down(); await win.mouse.move(cx + 120, cy + 60, { steps: 5 }); await win.mouse.up();
+  await win.keyboard.press('Enter');
+  await win.waitForTimeout(300);
+  // filter: gaussian blur via command without dialog
+  await ev(async () => { const { FILTERS } = await import('./js/engine/filters.js'); });
+  await win.screenshot({ path: OUT + '/03-after.png' });
+  const info2 = await ev(() => ({ hist: app.doc.history.map(h => h.name), active: app.doc.active?.name }));
+  console.log(JSON.stringify(info2));
+};

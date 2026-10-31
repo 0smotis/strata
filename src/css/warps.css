@@ -1,0 +1,34 @@
+/* Puppet Warp / Perspective Warp / Transform › Warp dialogs (src/js/ui/warps.js) */
+.wpx-modal { max-width: calc(100vw - 24px); max-height: calc(100vh - 24px); }
+.wpx-modal .mb { padding: 10px 12px; }
+.wpx { display: flex; gap: 10px; align-items: flex-start; }
+.wpx .tools { display: flex; flex-direction: column; gap: 2px; padding: 2px; background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius); }
+.wpx .tools .ibtn { width: 30px; height: 30px; }
+.wpx .stagewrap { flex: none; border: 1px solid var(--line); line-height: 0; background: #232323; }
+.wpx canvas.stage { display: block; outline: none; touch-action: none; }
+.wpx .side { width: 268px; flex: none; display: flex; flex-direction: column; gap: 10px; max-height: 100%; overflow-y: auto; }
+.wpx .grp { display: flex; flex-direction: column; gap: 7px; padding: 8px 10px 10px; background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius); }
+.wpx .grp .gt { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
+.wpx .grp.dim { opacity: .45; }
+.wpx .grp.dim .btnrow, .wpx .grp.dim .btnrow * { pointer-events: none; }
+.wpx .side .row { display: flex; align-items: center; gap: 6px; }
+.wpx .side .row > label:first-child { width: 78px; color: var(--text2); flex: none; }
+.wpx .side .row select { flex: 1; min-width: 0; }
+.wpx .side .row input[type=range] { flex: 1; min-width: 70px; }
+.wpx .side .row input[type=number] { width: 50px; }
+.wpx .side .numfield input { width: 50px; }
+.wpx .side label { color: var(--text); }
+.wpx .btnrow { display: flex; flex-wrap: wrap; gap: 6px; }
+.wpx .btnrow.icons .ibtn { width: 34px; height: 30px; border: 1px solid var(--line2); }
+.wpx .btn.sm { height: 24px; padding: 0 10px; font-size: 11px; }
+.wpx .seg .ibtn { height: 24px; min-width: 30px; }
+.wpx .seg .ibtn:disabled { opacity: .4; }
+.wpx .seg.modes { display: flex; }
+.wpx .seg.modes .ibtn.wide { flex: 1; gap: 6px; height: 28px; padding: 0 10px; color: var(--text); }
+.wpx .seg.modes .ibtn.wide.on { background: var(--accent); color: #fff; }
+.wpx .seg.modes .ibtn.wide span { font-size: 12px; }
+.wpx .note { color: var(--text2); font-size: 11px; line-height: 1.4; }
+.wpx .info { color: var(--text3); font-size: 11px; }
+.wpx .hint { color: var(--text3); font-size: 11px; line-height: 1.55; border-top: 1px solid var(--line2); padding-top: 8px; }
+.wpx .hint b { color: var(--text2); font-weight: 600; }
+.wpx input:disabled, .wpx select:disabled { opacity: .45; }

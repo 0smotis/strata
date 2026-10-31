@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strata</title>
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/cameraraw.css">
+<link rel="stylesheet" href="css/warps.css">
+<link rel="stylesheet" href="css/neural.css">
+<script src="vendor/ag-psd.js"></script>
+</head>
+<body>
+<div id="app">
+  <header id="titlebar">
+    <div class="logo" title="Strata">St</div>
+    <nav id="menubar"></nav>
+    <div class="drag"></div>
+    <div id="title-search"><span class="ico-s"></span><input id="cmd-search" placeholder="Search commands (Ctrl+F)" spellcheck="false"></div>
+    <div class="overlay-space"></div>
+  </header>
+  <div id="optionsbar"></div>
+  <div id="main">
+    <aside id="toolbar"></aside>
+    <section id="docarea">
+      <div id="tabs"></div>
+      <div id="viewport-wrap">
+        <div id="ruler-corner"></div>
+        <canvas id="ruler-h"></canvas>
+        <canvas id="ruler-v"></canvas>
+        <div id="viewport" tabindex="0">
+          <canvas id="view"></canvas>
+          <canvas id="overlay"></canvas>
+          <div id="text-editor" contenteditable="plaintext-only" spellcheck="false"></div>
+          <div id="taskbar" class="hidden"></div>
+        </div>
+        <div id="home"></div>
+      </div>
+      <div id="timeline" class="hidden"></div>
+      <footer id="statusbar"><span id="st-zoom"></span><span id="st-info"></span><span id="st-msg"></span><span class="grow"></span><span id="st-progress" class="hidden"><span class="bar"><span></span></span><span class="label"></span></span></footer>
+    </section>
+    <div id="panel-resizer"></div>
+    <aside id="panels"></aside>
+  </div>
+</div>
+<div id="menus"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
